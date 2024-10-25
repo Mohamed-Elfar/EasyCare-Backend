@@ -1,1 +1,10 @@
-.env
+# Python
+*.pyc
+__pycache__/
+
+# Environment Variables
+#.env
+
+# Other files/folders to ignore
+*.db
+*.sqlite3
