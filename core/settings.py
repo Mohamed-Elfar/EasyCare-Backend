@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q89!vs6uq4x4%xsy10)%c&7kb&6)psr^_!gl$$lj3v=bdib7-m'
 
 DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'grackle-notable-hardly.ngrok-free.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'grackle-notable-hardly.ngrok-free.app', 'your-render-app.onrender.com']
 
 CORS_ALLOW_ALL_ORIGINS = True
 from corsheaders.defaults import default_headers
@@ -150,7 +150,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
