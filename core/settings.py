@@ -23,15 +23,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q89!vs6uq4x4%xsy10)%c&7kb&6)psr^_!gl$$lj3v=bdib7-m'
 
 DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'grackle-notable-hardly.ngrok-free.app', 'your-render-app.onrender.com']
-
-CORS_ALLOW_ALL_ORIGINS = True
-from corsheaders.defaults import default_headers
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'ngrok-skip-browser-warning',
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'grackle-notable-hardly.ngrok-free.app',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://grackle-notable-hardly.ngrok-free.app",
+]
+CORS_ALLOW_CREDENTIALS = True
+from corsheaders.defaults import default_headers
+
+# CORS_ALLOW_HEADERS = list(default_headers) + [
+#     'ngrok-skip-browser-warning',
+# ]
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'ngrok-skip-browser-warning',
+    "Authorization",
+    "Content-Type",
+]
 CORS_ALLOW_METHODS = [
     'GET',
     'POST',
@@ -56,6 +66,7 @@ INSTALLED_APPS = [
     "Account",
     "Prescription",
     "ContactUs",
+    "Appointment",
 
 ]
 
@@ -124,16 +135,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'core.validators.CustomPasswordValidator',
     },
 ]
 AUTHENTICATION_BACKENDS = [
@@ -150,8 +152,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = 'static/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -164,3 +165,6 @@ EMAIL_HOST_USER = config('EMAIL_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD')
 EMAIL_TIMEOUT = 60
 
+# settings.py
+TIME_ZONE = 'UTC'  # or your preferred timezone
+USE_TZ = True

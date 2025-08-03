@@ -15,8 +15,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
         }
 
     def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        from core.validators import validate_password_strength
+        
+        errors = validate_password_strength(value)
+        if errors:
+            raise serializers.ValidationError(errors)
+        
         return value
 
     def validate_national_id(self, value):
@@ -100,6 +104,15 @@ class SetNewPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
     new_password = serializers.CharField(min_length=8)
+    
+    def validate_new_password(self, value):
+        from core.validators import validate_password_strength
+        
+        errors = validate_password_strength(value)
+        if errors:
+            raise serializers.ValidationError(errors)
+        
+        return value
 
 
 class NestedPrescriptionSerializer(serializers.ModelSerializer):
