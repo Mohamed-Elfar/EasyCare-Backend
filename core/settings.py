@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-q89!vs6uq4x4%xsy10)%c&7kb&6)psr^_!gl$$lj3v=bdib7-m'
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'grackle-notable-hardly.ngrok-free.app',
 ]
 
@@ -168,3 +168,7 @@ EMAIL_TIMEOUT = 60
 # settings.py
 TIME_ZONE = 'UTC'  # or your preferred timezone
 USE_TZ = True
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

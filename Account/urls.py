@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import UserRegistrationView, UserProfileView
 from Account.views import SetNewPasswordView,CustomTokenObtainPairView,RequestPasswordResetView,VerifyOTPView,PatientSearchView,DoctorListView,PharmacistListView
+from .views import AccountStatusUpdateView
+from .views import AdminUserListView
 
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='user-register'),
@@ -12,5 +14,7 @@ urlpatterns = [
     path('set-new-password/', SetNewPasswordView.as_view(), name='set_new_password'),
     path('doctors-categories/', DoctorListView.as_view(), name='doctor-list'),
     path('pharmacists-categories/', PharmacistListView.as_view(), name='pharmacist-list'),
+    path('admin/account-status/<int:id>/', AccountStatusUpdateView.as_view(), name='account-status-update'),
+    path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
 
 ]

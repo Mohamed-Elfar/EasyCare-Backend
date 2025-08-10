@@ -322,16 +322,11 @@ class BookAppointmentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Appointment must be scheduled for a future date and time.")
             
             # Get doctor's schedule
-            day_of_week = appointment_date.weekday()
-            try:
-                schedule = DoctorSchedule.objects.get(
-                    doctor=doctor,
-                    day_of_week=day_of_week,
-                    is_working_day=True
-                )
-            except DoctorSchedule.DoesNotExist:
+           # Get doctor's schedule (week-specific or recurring)
+            schedule = DoctorSchedule.get_schedule_for_date(doctor, appointment_date)
+            if not schedule or not schedule.is_working_day:
                 raise serializers.ValidationError("Doctor is not available on this day.")
-            
+                
             # Check working hours
             if not (schedule.start_time <= appointment_time <= schedule.end_time):
                 raise serializers.ValidationError(

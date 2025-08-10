@@ -68,10 +68,7 @@ def doctor_availability(request, doctor_id):
         day_of_week = current_date.weekday()
         
         # Get doctor's schedule for this day
-        schedule = DoctorSchedule.objects.filter(
-            doctor=doctor,
-            day_of_week=day_of_week
-        ).first()
+        schedule = DoctorSchedule.get_schedule_for_date(doctor, current_date)
         
         # Check if doctor has a day off
         day_off = DoctorDayOff.objects.filter(
@@ -108,26 +105,62 @@ def doctor_availability(request, doctor_id):
     })
 
 
+# class BookAppointmentView(generics.CreateAPIView):
+#     serializer_class = BookAppointmentSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self, request, *args, **kwargs):
+#         try:
+#             # Debug incoming request
+#             print(f"Incoming request data: {request.data}")
+#             print(f"Current time: {timezone.now()}")
+            
+#             response = super().create(request, *args, **kwargs)
+#             print("Appointment created successfully")
+#             return response
+            
+#         except Exception as e:
+#             print(f"Error in BookAppointmentView: {str(e)}")
+#             return Response(
+#                 {"error": str(e)},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 class BookAppointmentView(generics.CreateAPIView):
     serializer_class = BookAppointmentSerializer
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         try:
-            # Debug incoming request
             print(f"Incoming request data: {request.data}")
             print(f"Current time: {timezone.now()}")
-            
+
+            doctor_id = request.data.get('doctor')
+            appointment_date = request.data.get('appointment_date')
+            if not doctor_id or not appointment_date:
+                return Response({"error": "Doctor and appointment_date are required."}, status=400)
+
+            doctor = get_object_or_404(CustomUser, id=doctor_id, user_type='doctor')
+            date_obj = datetime.strptime(appointment_date, "%Y-%m-%d").date()
+
+            # Use the robust schedule lookup
+            schedule = DoctorSchedule.get_schedule_for_date(doctor, date_obj)
+            if not schedule or not schedule.is_working_day:
+                return Response({"error": "No working schedule for this doctor on this date."}, status=400)
+
+            # Optionally: check if the requested time is within the schedule's available slots
+
             response = super().create(request, *args, **kwargs)
             print("Appointment created successfully")
             return response
-            
+
         except Exception as e:
             print(f"Error in BookAppointmentView: {str(e)}")
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
 class PatientAppointmentsView(generics.ListAPIView):
     """
     Get all appointments for the current patient

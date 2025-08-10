@@ -25,7 +25,11 @@ from .models import CustomUser
 # User Registration View
 class UserRegistrationView(APIView):
     def post(self, request):
-        serializer = CustomUserSerializer(data=request.data)
+        data = request.data.copy()
+        # Automatically activate patients
+        if data.get('user_type') == 'patient':
+            data['account_status'] = 'active'
+        serializer = CustomUserSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({"status": "User created"}, status=status.HTTP_201_CREATED)
@@ -160,3 +164,74 @@ class PharmacistListView(APIView):
         pharmacists = CustomUser.objects.filter(user_type='pharmacist')
         serializer = PharmacistSerializer(pharmacists, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+from rest_framework import generics, permissions
+from .models import CustomUser
+from .serializers import AccountStatusUpdateSerializer
+
+class IsAdminUser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_staff or request.user.is_superuser
+
+# class AccountStatusUpdateView(generics.UpdateAPIView):
+#     queryset = CustomUser.objects.all()
+#     serializer_class = AccountStatusUpdateSerializer
+#     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+#     lookup_field = 'id'
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+class AccountStatusUpdateView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AccountStatusUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    lookup_field = 'id'
+
+    def perform_update(self, serializer):
+        user = self.get_object()
+        old_status = user.account_status
+        instance = serializer.save()
+        # If status changed to active, send email
+        if old_status != 'active' and instance.account_status == 'active':
+            send_mail(
+                subject='Your CareSync. account is activated',
+                message='Congratulations! Your account has been activated by the admin. You can now log in and use the platform.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[instance.email],
+                fail_silently=True,
+            )
+        # If status changed to rejected, send rejection email and delete user
+        elif old_status != 'rejected' and instance.account_status == 'rejected':
+            email = user.email
+            send_mail(
+                subject='Your CareSync account was rejected',
+                message='Sorry, your account was rejected because some data is not valid. Please try again with valid data.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=True,
+            )
+            user.delete()
+        else:
+            serializer.save()
+from rest_framework import generics, permissions
+from .models import CustomUser
+from .serializers import AdminUserListSerializer
+class AdminUserListView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AdminUserListSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
