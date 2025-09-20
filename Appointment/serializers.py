@@ -10,6 +10,10 @@ from django.utils.timezone import make_aware, is_naive
 from datetime import datetime
 from .models import Appointment, DoctorSchedule, DoctorDayOff
 from rest_framework.exceptions import PermissionDenied
+from rest_framework import serializers
+from .models import DoctorSchedule
+from datetime import date, timedelta
+
 class DoctorSerializer(serializers.ModelSerializer):
     """
     Serializer for doctor information in appointment context
@@ -17,41 +21,6 @@ class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'full_name', 'email', 'phone_number', 'hospital', 'clinic', 'specialization']
-
-
-# class DoctorScheduleSerializer(serializers.ModelSerializer):
-#     """
-#     Serializer for doctor's weekly schedule
-#     """
-#     day_name = serializers.SerializerMethodField()
-#     doctor_name = serializers.CharField(source='doctor.full_name', read_only=True)
-#     next_date = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = DoctorSchedule
-#         fields = [
-#             'id', 'doctor', 'doctor_name',
-#             'day_of_week', 'day_name', 'next_date',
-#             'start_time', 'end_time',
-#             'is_working_day', 'appointment_duration'
-#         ]
-#         read_only_fields = ['doctor']
-
-#     def get_day_name(self, obj):
-#         return dict(DoctorSchedule.WEEKDAYS).get(obj.day_of_week, '')
-
-#     def get_next_date(self, obj):
-#         from datetime import date, timedelta
-#         today = date.today()
-#         days_ahead = (obj.day_of_week - today.weekday() + 7) % 7
-#         if days_ahead == 0:
-#             days_ahead = 7  # Next week if today is the same day
-#         next_date = today + timedelta(days=days_ahead)
-#         return next_date.isoformat()
-
-from rest_framework import serializers
-from .models import DoctorSchedule
-from datetime import date, timedelta
 
 class DoctorScheduleSerializer(serializers.ModelSerializer):
     day_name = serializers.SerializerMethodField()
@@ -264,8 +233,6 @@ class DoctorDayOffSerializer(serializers.ModelSerializer):
         model = DoctorDayOff
         fields = ['id', 'doctor', 'doctor_name', 'date', 'reason', 'created_at']
         read_only_fields = ['created_at']
-
-
 class DoctorAvailabilitySerializer(serializers.Serializer):
     """
     Serializer for getting doctor availability for a specific date range
@@ -285,7 +252,6 @@ class DoctorAvailabilitySerializer(serializers.Serializer):
             raise serializers.ValidationError("Date range cannot exceed 30 days.")
         
         return data
-
 
 class BookAppointmentSerializer(serializers.ModelSerializer):
     """

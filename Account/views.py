@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from .serializers import (
     CustomUserSerializer,
     CustomTokenObtainPairSerializer,
@@ -21,6 +20,14 @@ from .serializers import (
     PharmacistSerializer
 )
 from .models import CustomUser
+from rest_framework import generics, permissions
+from .models import CustomUser
+from .serializers import AccountStatusUpdateSerializer
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework import generics, permissions
+from .models import CustomUser
+from .serializers import AdminUserListSerializer
 
 # User Registration View
 class UserRegistrationView(APIView):
@@ -165,32 +172,9 @@ class PharmacistListView(APIView):
         serializer = PharmacistSerializer(pharmacists, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
-
-
-
-
-
-
-
-
-from rest_framework import generics, permissions
-from .models import CustomUser
-from .serializers import AccountStatusUpdateSerializer
-
 class IsAdminUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_staff or request.user.is_superuser
-
-# class AccountStatusUpdateView(generics.UpdateAPIView):
-#     queryset = CustomUser.objects.all()
-#     serializer_class = AccountStatusUpdateSerializer
-#     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
-#     lookup_field = 'id'
-
-from django.core.mail import send_mail
-from django.conf import settings
 
 class AccountStatusUpdateView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
@@ -224,9 +208,7 @@ class AccountStatusUpdateView(generics.UpdateAPIView):
             user.delete()
         else:
             serializer.save()
-from rest_framework import generics, permissions
-from .models import CustomUser
-from .serializers import AdminUserListSerializer
+
 class AdminUserListView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AdminUserListSerializer

@@ -7,14 +7,18 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import datetime, date, timedelta
 from django.db.models import Q
-
 from .models import DoctorSchedule, Appointment, DoctorDayOff
 from Account.models import CustomUser
 from .serializers import (
     DoctorSerializer, DoctorScheduleSerializer, AppointmentSerializer,
     DoctorDayOffSerializer, DoctorAvailabilitySerializer, BookAppointmentSerializer
 )
-
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import DoctorSchedule
+from .serializers import DoctorScheduleSerializer
+from django.db.models import Q
+from datetime import date, timedelta
 
 class AvailableDoctorsView(generics.ListAPIView):
     """
@@ -43,7 +47,6 @@ class DoctorScheduleView(generics.ListAPIView):
     def get_queryset(self):
         doctor_id = self.kwargs.get('doctor_id')
         return DoctorSchedule.objects.filter(doctor_id=doctor_id)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -104,27 +107,6 @@ def doctor_availability(request, doctor_id):
         'availability': availability
     })
 
-
-# class BookAppointmentView(generics.CreateAPIView):
-#     serializer_class = BookAppointmentSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def create(self, request, *args, **kwargs):
-#         try:
-#             # Debug incoming request
-#             print(f"Incoming request data: {request.data}")
-#             print(f"Current time: {timezone.now()}")
-            
-#             response = super().create(request, *args, **kwargs)
-#             print("Appointment created successfully")
-#             return response
-            
-#         except Exception as e:
-#             print(f"Error in BookAppointmentView: {str(e)}")
-#             return Response(
-#                 {"error": str(e)},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
 class BookAppointmentView(generics.CreateAPIView):
     serializer_class = BookAppointmentSerializer
     permission_classes = [IsAuthenticated]
@@ -285,15 +267,6 @@ class AppointmentDetailView(generics.RetrieveUpdateDestroyAPIView):
             
             return Response({'message': 'Appointment cancelled successfully'})
 
-
-# # Views for doctors to manage their schedule (optional)
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
-from .models import DoctorSchedule
-from .serializers import DoctorScheduleSerializer
-from django.db.models import Q
-from datetime import date, timedelta
-
 class DoctorScheduleManageView(generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = DoctorScheduleSerializer
     permission_classes = [IsAuthenticated]
@@ -317,18 +290,6 @@ class DoctorScheduleManageView(generics.ListCreateAPIView, generics.RetrieveUpda
     
     def perform_create(self, serializer):
         serializer.save(doctor=self.request.user)
-# class DoctorScheduleManageView(generics.ListCreateAPIView):
-#     serializer_class = DoctorScheduleSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_queryset(self):
-#         return DoctorSchedule.objects.filter(doctor=self.request.user)
-
-#     def perform_create(self, serializer):
-#         # Directly assign the current user as the doctor
-#         serializer.save(doctor=self.request.user)
-
-
 
 class DoctorDayOffView(generics.ListCreateAPIView):
     """

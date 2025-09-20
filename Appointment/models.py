@@ -4,79 +4,9 @@ from django.utils import timezone
 from Account.models import CustomUser
 from datetime import time, date, datetime, timedelta
 from django.utils.timezone import make_aware, is_naive
-
 from django.db import models
 from Account.models import CustomUser
 from datetime import date, datetime, timedelta
-
-# class DoctorSchedule(models.Model):
-#     WEEKDAYS = [
-#         (0, 'Monday'),
-#         (1, 'Tuesday'), 
-#         (2, 'Wednesday'),
-#         (3, 'Thursday'),
-#         (4, 'Friday'),
-#         (5, 'Saturday'),
-#         (6, 'Sunday'),
-#     ]
-    
-#     doctor = models.ForeignKey(
-#         CustomUser, 
-#         on_delete=models.CASCADE,
-#         limit_choices_to={'user_type': 'doctor'},
-#         related_name='schedules'
-#     )
-#     day_of_week = models.IntegerField(choices=WEEKDAYS)
-#     start_time = models.TimeField()
-#     end_time = models.TimeField()
-#     is_working_day = models.BooleanField(default=True)
-#     appointment_duration = models.IntegerField(default=30)
-#     week_start_date = models.DateField(
-#         default=date(2000, 1, 1),  # Arbitrary old date for recurring schedules
-#         help_text="First day of the week this schedule applies to"
-#     )
-#     is_recurring = models.BooleanField(
-#         default=True,
-#         help_text="Does this schedule repeat weekly?"
-#     )
-    
-#     class Meta:
-#         unique_together = ['doctor', 'day_of_week', 'week_start_date']
-#         ordering = ['week_start_date', 'day_of_week', 'start_time']
-    
-#     def __str__(self):
-#         day_name = dict(self.WEEKDAYS)[self.day_of_week]
-#         return f"{self.doctor.full_name} - {day_name} ({self.start_time}-{self.end_time}) Week {self.week_start_date}"
-    
-#     def get_available_slots(self, date_obj):
-#         if not self.is_working_day or date_obj.weekday() != self.day_of_week:
-#             return []
-            
-#         slots = []
-#         current_time = self.start_time
-#         end_time = self.end_time
-        
-#         while current_time < end_time:
-#             slot_datetime = datetime.combine(date_obj, current_time)
-#             is_booked = Appointment.objects.filter(
-#                 doctor=self.doctor,
-#                 appointment_date=date_obj,
-#                 appointment_time=current_time,
-#                 status__in=['confirmed', 'pending']
-#             ).exists()
-            
-#             slots.append({
-#                 'time': current_time.strftime('%H:%M'),
-#                 'datetime': slot_datetime,
-#                 'is_available': not is_booked
-#             })
-            
-#             current_datetime = datetime.combine(date_obj, current_time)
-#             next_datetime = current_datetime + timedelta(minutes=self.appointment_duration)
-#             current_time = next_datetime.time()
-        
-#         return slots
-
 from django.db.models import Q
 class DoctorSchedule(models.Model):
     WEEKDAYS = [
@@ -161,81 +91,6 @@ class DoctorSchedule(models.Model):
             next_datetime = current_datetime + timedelta(minutes=self.appointment_duration)
             current_time = next_datetime.time()
         return slots
-# class DoctorSchedule(models.Model):
-#     """
-#     Represents a doctor's weekly schedule with working hours and days off
-#     """
-#     WEEKDAYS = [
-#         (0, 'Monday'),
-#         (1, 'Tuesday'), 
-#         (2, 'Wednesday'),
-#         (3, 'Thursday'),
-#         (4, 'Friday'),
-#         (5, 'Saturday'),
-#         (6, 'Sunday'),
-#     ]
-    
-#     doctor = models.ForeignKey(
-#         CustomUser, 
-#         on_delete=models.CASCADE, 
-#         limit_choices_to={'user_type': 'doctor'},
-#         related_name='schedules'
-#     )
-#     day_of_week = models.IntegerField(choices=WEEKDAYS)
-#     start_time = models.TimeField()
-#     end_time = models.TimeField()
-#     is_working_day = models.BooleanField(default=True)
-#     appointment_duration = models.IntegerField(default=30, help_text="Duration in minutes")
-    
-#     class Meta:
-#         unique_together = ['doctor', 'day_of_week']
-#         ordering = ['day_of_week', 'start_time']
-    
-#     def __str__(self):
-#         day_name = dict(self.WEEKDAYS)[self.day_of_week]
-#         if self.is_working_day:
-#             return f"{self.doctor.full_name} - {day_name} ({self.start_time} - {self.end_time})"
-#         else:
-#             return f"{self.doctor.full_name} - {day_name} (Day Off)"
-    
-#     def get_available_slots(self, date_obj):
-#         """
-#         Get available time slots for a specific date
-#         """
-#         if not self.is_working_day:
-#             return []
-        
-#         # Check if the date matches this day of week
-#         if date_obj.weekday() != self.day_of_week:
-#             return []
-        
-#         slots = []
-#         current_time = self.start_time
-#         end_time = self.end_time
-        
-#         while current_time < end_time:
-#             slot_datetime = datetime.combine(date_obj, current_time)
-            
-#             # Check if this slot is already booked
-#             is_booked = Appointment.objects.filter(
-#                 doctor=self.doctor,
-#                 appointment_date=date_obj,
-#                 appointment_time=current_time,
-#                 status__in=['confirmed', 'pending']
-#             ).exists()
-            
-#             slots.append({
-#                 'time': current_time.strftime('%H:%M'),
-#                 'datetime': slot_datetime,
-#                 'is_available': not is_booked
-#             })
-            
-#             # Add appointment duration to get next slot
-#             current_datetime = datetime.combine(date_obj, current_time)
-#             next_datetime = current_datetime + timedelta(minutes=self.appointment_duration)
-#             current_time = next_datetime.time()
-        
-#         return slots
 
 
 class Appointment(models.Model):

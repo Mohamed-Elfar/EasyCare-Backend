@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator, EmailValidator
 from django.utils import timezone
 from datetime import timedelta
-
-
 from datetime import date
 
 class CustomUserManager(BaseUserManager):
@@ -25,7 +23,6 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('gender', 'other')
         extra_fields.setdefault('address', 'Admin Address')
         extra_fields.setdefault('user_type', 'doctor')  # or 'pharmacist' or 'patient'
-
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
